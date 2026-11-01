@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Streamlit secrets and local configuration
+.streamlit/secrets.toml
+
+# Local data and training outputs
+dataset/
+Training/
+Testing/
+archive.zip
+*.csv
+training_curves.png
+confusion_matrix.png
+classification_report.txt
+
+# Editor and operating-system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
