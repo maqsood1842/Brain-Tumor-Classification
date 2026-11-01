@@ -49,9 +49,9 @@ The output labels used by the dashboard are:
 3. No Tumor (`notumor`)
 4. Pituitary (`pituitary`)
 
-**Class-order provenance:** the available `step1/train.py` assigns `class_names = train_ds.class_names`; with the four current directory names, Keras's directory loader resolves the order to `glioma`, `meningioma`, `notumor`, `pituitary`. This matches the output order configured in `utils/inference.py`. However, that training script builds EfficientNetB0, while the saved artifact contains MobileNetV2. The original notebook and `class_names.json` are absent, so the script's verified label order cannot be conclusively attributed to these exact model weights. Obtain the matching training run's class names before deployment or interpreting predictions.
+**Class-order provenance:** the project owner confirmed the output order from the original Colab MobileNetV2 training run as `["glioma", "meningioma", "notumor", "pituitary"]` for indices 0–3. This matches `utils/inference.py`. The adjacent `step1/train.py` is a separate EfficientNetB0 training script and is not the source of the saved MobileNetV2 weights.
 
-The model archive confirms a 4-neuron softmax output and embeds preprocessing equivalent to `x / 127.5 - 1`. The available training script and data loader both use 224 × 224 images and pass 0–255 pixel values to the model, consistent with the saved model's embedded normalization.
+The model archive confirms a 4-neuron softmax output and embeds preprocessing equivalent to `x / 127.5 - 1`. The confirmed Colab training configuration and saved model use 224 × 224 images and 0–255 pixel values before model normalization. Inference uses bilinear resizing, matching the Keras directory loader's default.
 
 ## Disclaimer
 

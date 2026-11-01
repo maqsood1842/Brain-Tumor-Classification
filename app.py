@@ -398,16 +398,12 @@ def show_model_details() -> None:
         hide_index=True,
         use_container_width=True,
     )
-    st.warning(
-        "The available training script sets class_names = train_ds.class_names, which resolves to "
-        "glioma, meningioma, notumor, pituitary for the current folders; this matches the app mapping. "
-        "However, that script builds EfficientNetB0 while this saved artifact is MobileNetV2, and the "
-        "original class_names.json/notebook is unavailable. The mapping is therefore verified for the "
-        "available script, but not conclusively linked to these exact weights."
+    st.success(
+        "Class order verified against the project owner's original Colab MobileNetV2 training run: "
+        "glioma, meningioma, notumor, pituitary (output indices 0–3)."
     )
     st.caption(
-        "The adjacent training script describes an EfficientNetB0 model, whereas this saved artifact "
-        "contains MobileNetV2. The script therefore cannot independently verify this artifact’s class mapping."
+        "The adjacent step1/train.py is a separate EfficientNetB0 experiment and is not the source of this model."
     )
 
 
