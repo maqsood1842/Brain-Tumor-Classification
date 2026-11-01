@@ -261,7 +261,7 @@ def show_classifier() -> None:
         st.markdown('<div class="section-heading">Ready for analysis</div>', unsafe_allow_html=True)
         st.markdown(
             '<div class="section-copy">Your image is converted to RGB and resized to 224 × 224 '
-            "using bilinear interpolation, matching the training data loader. Pixel scaling is applied inside the trained model.</div>",
+            "using bilinear interpolation. Pixel scaling is applied inside the trained model.</div>",
             unsafe_allow_html=True,
         )
         if not MODEL_PATH.is_file():
@@ -381,7 +381,7 @@ def show_model_details() -> None:
         st.markdown("#### Inference preprocessing")
         st.markdown(
             "- Convert the uploaded image to RGB.\n"
-            "- Resize to `224 × 224` with bilinear interpolation, matching the training loader.\n"
+            "- Resize to `224 × 224` with bilinear interpolation (the standard Keras directory-loader default).\n"
             "- Supply 0–255 pixel values; the model graph applies `x / 127.5 - 1`.\n"
             "- Model output: four softmax scores."
         )
@@ -403,7 +403,8 @@ def show_model_details() -> None:
         "glioma, meningioma, notumor, pituitary (output indices 0–3)."
     )
     st.caption(
-        "The adjacent step1/train.py is a separate EfficientNetB0 experiment and is not the source of this model."
+        "The adjacent step1/train.py is a separate EfficientNetB0 experiment, not the source of these weights. "
+        "The original Colab notebook was unavailable to verify its resize interpolation."
     )
 
 

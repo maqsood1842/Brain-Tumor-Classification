@@ -40,7 +40,7 @@ Streamlit prints the local URL after startup (normally `http://localhost:8501`).
 
 ## Model and preprocessing
 
-The saved artifact is a Keras functional model with a MobileNetV2 (`mobilenetv2_1.00_224`) backbone and a four-unit softmax head. Its input shape is `224 × 224 × 3`. The dashboard converts uploaded images to RGB and resizes them to 224 × 224 with bilinear interpolation, matching the available training script's `image_dataset_from_directory` default. It passes 0–255 float pixels to the model; the saved graph contains the `x / 127.5 - 1` normalization.
+The saved artifact is a Keras functional model with a MobileNetV2 (`mobilenetv2_1.00_224`) backbone and a four-unit softmax head. Its input shape is `224 × 224 × 3`. The dashboard converts uploaded images to RGB and resizes them to 224 × 224 with bilinear interpolation, matching the standard `image_dataset_from_directory` default. It passes 0–255 float pixels to the model; the saved graph contains the `x / 127.5 - 1` normalization. The original Colab notebook was not available locally, so its resize interpolation could not be independently checked.
 
 The output labels used by the dashboard are:
 
@@ -51,7 +51,7 @@ The output labels used by the dashboard are:
 
 **Class-order provenance:** the project owner confirmed the output order from the original Colab MobileNetV2 training run as `["glioma", "meningioma", "notumor", "pituitary"]` for indices 0–3. This matches `utils/inference.py`. The adjacent `step1/train.py` is a separate EfficientNetB0 training script and is not the source of the saved MobileNetV2 weights.
 
-The model archive confirms a 4-neuron softmax output and embeds preprocessing equivalent to `x / 127.5 - 1`. The confirmed Colab training configuration and saved model use 224 × 224 images and 0–255 pixel values before model normalization. Inference uses bilinear resizing, matching the Keras directory loader's default.
+The model archive confirms a 4-neuron softmax output, a 224 × 224 × 3 input, and embedded preprocessing equivalent to `x / 127.5 - 1`. Inference supplies RGB 0–255 float pixels, allowing the saved graph to apply its own normalization. Bilinear resizing matches the standard Keras directory-loader default, but should be checked against the original notebook when it becomes available.
 
 ## Disclaimer
 
