@@ -7,9 +7,10 @@ A Streamlit dashboard for demonstrating the existing brain MRI classification mo
 ## Features
 
 - Modern blue-and-white interface with sidebar navigation
-- Home dashboard, MRI classification, project overview, and model details
+- Home dashboard with Predict and Model Performance tabs, plus project overview and model details
 - JPG, JPEG, and PNG upload with preview
 - Explicit prediction action and all-class probability chart
+- Test accuracy, loss, macro F1, per-class results, confusion matrix, and training curves
 - Loads the existing Keras model; no model training or dataset download is required
 
 ## Project files
@@ -17,7 +18,11 @@ A Streamlit dashboard for demonstrating the existing brain MRI classification mo
 ```text
 app.py
 brain_tumor_model.keras
+metrics.json
+training_curves.png
+confusion_matrix.png
 requirements.txt
+PROJECT_REPORT.md
 utils/
   __init__.py
   inference.py
@@ -51,7 +56,11 @@ The output labels used by the dashboard are:
 
 **Class-order provenance:** the project owner confirmed the output order from the original Colab MobileNetV2 training run as `["glioma", "meningioma", "notumor", "pituitary"]` for indices 0–3. This matches `utils/inference.py`. The adjacent `step1/train.py` is a separate EfficientNetB0 training script and is not the source of the saved MobileNetV2 weights.
 
-The model archive confirms a 4-neuron softmax output, a 224 × 224 × 3 input, and embedded preprocessing equivalent to `x / 127.5 - 1`. Inference supplies RGB 0–255 float pixels, allowing the saved graph to apply its own normalization. Bilinear resizing matches the standard Keras directory-loader default, but should be checked against the original notebook when it becomes available.
+The model archive confirms a 4-neuron softmax output, a 224 × 224 × 3 input, and embedded preprocessing equivalent to `x / 127.5 - 1`. Inference supplies RGB 0–255 float pixels, allowing the saved graph to apply its own normalization. Bilinear resizing matches the standard Keras directory-loader default.
+
+## Recorded Colab evaluation
+
+`metrics.json`, `training_curves.png`, and `confusion_matrix.png` are copied from the executed notebook's saved evaluation output (accuracy 81.06%, loss 0.6986, macro F1 0.8019). The PNGs are extracted from the notebook's embedded figure outputs; the metrics are transcribed from its test report. These are run-recorded artifacts, not a fresh local evaluation. The notebook output lists the plots in its Drive model directory, but Google Drive itself is not mounted/accessible from this environment.
 
 ## Disclaimer
 

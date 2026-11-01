@@ -17,8 +17,6 @@ Training/
 Testing/
 archive.zip
 *.csv
-training_curves.png
-confusion_matrix.png
 classification_report.txt
 
 # Editor and operating-system files

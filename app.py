@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import io
+import json
 from pathlib import Path
 
 import numpy as np
@@ -15,7 +16,10 @@ from utils.inference import CLASS_NAMES, DISPLAY_NAMES, predict_image
 
 ROOT = Path(__file__).resolve().parent
 MODEL_PATH = ROOT / "brain_tumor_model.keras"
-PAGES = ("Home", "Classify MRI", "About Project", "Model Details")
+METRICS_PATH = ROOT / "metrics.json"
+TRAINING_CURVES_PATH = ROOT / "training_curves.png"
+CONFUSION_MATRIX_PATH = ROOT / "confusion_matrix.png"
+PAGES = ("Dashboard", "About Project", "Model Details")
 MODEL_INPUT_SIZE = (224, 224)
 MODEL_FILE_SIZE_MB = MODEL_PATH.stat().st_size / (1024 * 1024) if MODEL_PATH.exists() else None
 
@@ -213,6 +217,88 @@ def show_home() -> None:
     st.info(
         "For learning and demonstration only. This application is not a medical device and "
         "cannot diagnose, rule out, or guide treatment for any condition."
+    )
+
+
+def show_model_performance() -> None:
+    show_hero(
+        "Evaluation",
+        "Model performance",
+        "Test-set metrics and visualizations recorded by the executed Colab training notebook.",
+    )
+    if not METRICS_PATH.is_file():
+        st.error(f"Performance metrics were not found: `{METRICS_PATH.name}`.")
+        return
+
+    try:
+        with METRICS_PATH.open(encoding="utf-8") as metrics_file:
+            metrics = json.load(metrics_file)
+    except (OSError, json.JSONDecodeError) as error:
+        st.error(f"Unable to read `{METRICS_PATH.name}`: {error}")
+        return
+
+    test_metrics = metrics.get("test")
+    if not isinstance(test_metrics, dict):
+        st.error("The metrics file is missing the test evaluation section.")
+        return
+
+    try:
+        accuracy = float(test_metrics["accuracy"])
+        loss = float(test_metrics["loss"])
+        macro_f1 = float(test_metrics["macro_f1"])
+        macro_precision = float(test_metrics["macro_precision"])
+        macro_recall = float(test_metrics["macro_recall"])
+        per_class = test_metrics["per_class"]
+    except (KeyError, TypeError, ValueError) as error:
+        st.error(f"The test metrics are incomplete or invalid: {error}")
+        return
+
+    if not isinstance(per_class, list) or [row.get("class") for row in per_class if isinstance(row, dict)] != list(CLASS_NAMES):
+        st.error("Per-class metrics must include all four classes in the model output order.")
+        return
+
+    score_columns = st.columns(4)
+    score_columns[0].metric("Test accuracy", f"{accuracy:.2%}")
+    score_columns[1].metric("Test loss", f"{loss:.4f}")
+    score_columns[2].metric("Macro F1", f"{macro_f1:.4f}")
+    score_columns[3].metric("Macro precision / recall", f"{macro_precision:.4f} / {macro_recall:.4f}")
+
+    st.markdown("#### Per-class test results")
+    class_frame = pd.DataFrame(per_class).rename(
+        columns={
+            "class": "Class",
+            "precision": "Precision",
+            "recall": "Recall",
+            "f1_score": "F1 score",
+            "support": "Support",
+        }
+    )
+    class_frame["Class"] = class_frame["Class"].map(
+        lambda name: DISPLAY_NAMES.get(name, name)
+    )
+    st.dataframe(
+        class_frame.style.format(
+            {"Precision": "{:.4f}", "Recall": "{:.4f}", "F1 score": "{:.4f}"}
+        ),
+        hide_index=True,
+        use_container_width=True,
+    )
+
+    plot_columns = st.columns(2, gap="large")
+    for column, plot_path, title in (
+        (plot_columns[0], CONFUSION_MATRIX_PATH, "Confusion matrix"),
+        (plot_columns[1], TRAINING_CURVES_PATH, "Training curves"),
+    ):
+        with column:
+            st.markdown(f"#### {title}")
+            if plot_path.is_file():
+                st.image(str(plot_path), use_container_width=True)
+            else:
+                st.error(f"Plot file not found: `{plot_path.name}`.")
+
+    st.caption(
+        f"Source: executed Colab notebook. Test set: {metrics.get('test_samples', 'unknown')} images. "
+        "Metrics are the recorded evaluation outputs; the model is not retrained by this dashboard."
     )
 
 
@@ -423,10 +509,13 @@ selected_page = st.sidebar.radio("Navigation", PAGES, label_visibility="collapse
 st.sidebar.markdown("---")
 st.sidebar.caption("Educational prototype · Not for clinical use")
 
-if selected_page == "Home":
+if selected_page == "Dashboard":
     show_home()
-elif selected_page == "Classify MRI":
-    show_classifier()
+    predict_tab, performance_tab = st.tabs(["Predict", "Model Performance"])
+    with predict_tab:
+        show_classifier()
+    with performance_tab:
+        show_model_performance()
 elif selected_page == "About Project":
     show_about()
 else:
