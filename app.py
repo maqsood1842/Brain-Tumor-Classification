@@ -261,7 +261,7 @@ def show_classifier() -> None:
         st.markdown('<div class="section-heading">Ready for analysis</div>', unsafe_allow_html=True)
         st.markdown(
             '<div class="section-copy">Your image is converted to RGB and resized to 224 × 224 '
-            "using Pillow’s default bicubic interpolation. Pixel scaling is applied inside the trained model.</div>",
+            "using bilinear interpolation, matching the training data loader. Pixel scaling is applied inside the trained model.</div>",
             unsafe_allow_html=True,
         )
         if not MODEL_PATH.is_file():
@@ -381,7 +381,7 @@ def show_model_details() -> None:
         st.markdown("#### Inference preprocessing")
         st.markdown(
             "- Convert the uploaded image to RGB.\n"
-            "- Resize to `224 × 224` with Pillow's default bicubic interpolation, matching the existing app.\n"
+            "- Resize to `224 × 224` with bilinear interpolation, matching the training loader.\n"
             "- Supply 0–255 pixel values; the model graph applies `x / 127.5 - 1`.\n"
             "- Model output: four softmax scores."
         )
@@ -399,10 +399,11 @@ def show_model_details() -> None:
         use_container_width=True,
     )
     st.warning(
-        "Class-order provenance: the original `class_names.json` is not present beside the model. "
-        "This app uses the alphabetical order of the available training dataset folders "
-        "(glioma, meningioma, notumor, pituitary), as approved for this implementation. "
-        "Verify this mapping against the original training run before interpreting any output."
+        "The available training script sets class_names = train_ds.class_names, which resolves to "
+        "glioma, meningioma, notumor, pituitary for the current folders; this matches the app mapping. "
+        "However, that script builds EfficientNetB0 while this saved artifact is MobileNetV2, and the "
+        "original class_names.json/notebook is unavailable. The mapping is therefore verified for the "
+        "available script, but not conclusively linked to these exact weights."
     )
     st.caption(
         "The adjacent training script describes an EfficientNetB0 model, whereas this saved artifact "

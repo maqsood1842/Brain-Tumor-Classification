@@ -40,7 +40,7 @@ Streamlit prints the local URL after startup (normally `http://localhost:8501`).
 
 ## Model and preprocessing
 
-The saved artifact is a Keras functional model with a MobileNetV2 (`mobilenetv2_1.00_224`) backbone and a four-unit softmax head. Its input shape is `224 × 224 × 3`. The dashboard converts uploaded images to RGB and resizes them to 224 × 224 with Pillow's default bicubic interpolation, matching the existing app's resize behavior. It passes 0–255 float pixels to the model; the saved graph contains the `x / 127.5 - 1` normalization.
+The saved artifact is a Keras functional model with a MobileNetV2 (`mobilenetv2_1.00_224`) backbone and a four-unit softmax head. Its input shape is `224 × 224 × 3`. The dashboard converts uploaded images to RGB and resizes them to 224 × 224 with bilinear interpolation, matching the available training script's `image_dataset_from_directory` default. It passes 0–255 float pixels to the model; the saved graph contains the `x / 127.5 - 1` normalization.
 
 The output labels used by the dashboard are:
 
@@ -49,7 +49,9 @@ The output labels used by the dashboard are:
 3. No Tumor (`notumor`)
 4. Pituitary (`pituitary`)
 
-**Class-order limitation:** the original `class_names.json` was not present with the model. The order above follows the alphabetical class-folder order in the available dataset and was approved as an inference for this dashboard. Since the nearby training script describes a different backbone (EfficientNetB0), this mapping is not independently verified against the exact run that produced the saved artifact. Check the original training-run labels before relying on model output.
+**Class-order provenance:** the available `step1/train.py` assigns `class_names = train_ds.class_names`; with the four current directory names, Keras's directory loader resolves the order to `glioma`, `meningioma`, `notumor`, `pituitary`. This matches the output order configured in `utils/inference.py`. However, that training script builds EfficientNetB0, while the saved artifact contains MobileNetV2. The original notebook and `class_names.json` are absent, so the script's verified label order cannot be conclusively attributed to these exact model weights. Obtain the matching training run's class names before deployment or interpreting predictions.
+
+The model archive confirms a 4-neuron softmax output and embeds preprocessing equivalent to `x / 127.5 - 1`. The available training script and data loader both use 224 × 224 images and pass 0–255 pixel values to the model, consistent with the saved model's embedded normalization.
 
 ## Disclaimer
 

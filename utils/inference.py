@@ -15,8 +15,8 @@ IMAGE_SIZE = (224, 224)
 
 
 def preprocess_image(image: Image.Image) -> tf.Tensor:
-    """Apply the app's RGB resize and leave pixel scaling to the model graph."""
-    resized = image.convert("RGB").resize(IMAGE_SIZE, resample=Image.Resampling.BICUBIC)
+    """Resize to the training loader's RGB input format; the model handles scaling."""
+    resized = image.convert("RGB").resize(IMAGE_SIZE, resample=Image.Resampling.BILINEAR)
     pixels = np.asarray(resized, dtype=np.float32)
     return tf.convert_to_tensor(np.expand_dims(pixels, axis=0), dtype=tf.float32)
 
